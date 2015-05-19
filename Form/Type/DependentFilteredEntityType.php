@@ -25,7 +25,8 @@ class DependentFilteredEntityType extends AbstractType
             'empty_value'       => '',
             'entity_alias'      => null,
             'parent_field'      => null,
-            'compound'          => false
+            'compound'          => false,
+            'excluded_entity_id'   => null
         ));
     }
 
@@ -58,6 +59,8 @@ class DependentFilteredEntityType extends AbstractType
         $builder->setAttribute("no_result_msg", $options['no_result_msg']);
         $builder->setAttribute("empty_value", $options['empty_value']);
 
+        $builder->setAttribute("excluded_entity_id", $options['excluded_entity_id']);
+
     }
 
     public function buildView(FormView $view, FormInterface $form, array $options)
@@ -66,6 +69,8 @@ class DependentFilteredEntityType extends AbstractType
         $view->vars['entity_alias'] = $form->getConfig()->getAttribute('entity_alias');
         $view->vars['no_result_msg'] = $form->getConfig()->getAttribute('no_result_msg');
         $view->vars['empty_value'] = $form->getConfig()->getAttribute('empty_value');
+
+        $view->vars['excluded_entity_id'] = $form->getConfig()->getAttribute('excluded_entity_id');
     }
 
 }

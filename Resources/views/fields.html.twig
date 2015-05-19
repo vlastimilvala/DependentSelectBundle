@@ -112,7 +112,8 @@
                     data: {
                         parent_id: jQuery(this).val(),
                         entity_alias: "{{ entity_alias }}",
-                        empty_value: "{{ empty_value }}"
+                        empty_value: "{{ empty_value }}",
+                        excluded_entity_id: "{{ excluded_entity_id }}"
                     },
                     url:"{{ path('shtumi_dependent_filtered_entity') }}",
                     success: function(msg){
@@ -158,6 +159,7 @@
                             term: term,
                             parent_id: jQuery("#{{ form.parent.offsetGet( parent_field ).vars.id }}").val(),
                             entity_alias: "{{ entity_alias }}"
+                            excluded_entity_id: "{{ excluded_entity_id }}"
                         };
                     },
                     results: function (data, page) {

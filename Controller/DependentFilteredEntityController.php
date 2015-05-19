@@ -24,6 +24,8 @@ class DependentFilteredEntityController extends Controller
         $parent_id    = $request->get('parent_id');
         $empty_value  = $request->get('empty_value');
 
+        $excludedEntityId = $request->get('excluded_entity_id');
+
         $entities = $this->get('service_container')->getParameter('shtumi.dependent_filtered_entities');
         $entity_inf = $entities[$entity_alias];
 
@@ -37,8 +39,10 @@ class DependentFilteredEntityController extends Controller
                 ->getRepository($entity_inf['class'])
                 ->createQueryBuilder('e')
                 ->where('e.' . $entity_inf['parent_property'] . ' = :parent_id')
+                ->andWhere('e.id != :excluded_entity_id')
                 ->orderBy('e.' . $entity_inf['order_property'], $entity_inf['order_direction'])
-                ->setParameter('parent_id', $parent_id);
+                ->setParameter('parent_id', $parent_id)
+                ->setParameter('excluded_entity_id', $excludedEntityId);
 
 
         if (null !== $entity_inf['callback']) {
@@ -85,7 +89,6 @@ class DependentFilteredEntityController extends Controller
 
         $entity_alias = $request->get('entity_alias');
         $parent_id    = $request->get('parent_id');
-        $empty_value  = $request->get('empty_value');
 
         $entities = $this->get('service_container')->getParameter('shtumi.dependent_filtered_entities');
         $entity_inf = $entities[$entity_alias];
