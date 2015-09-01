@@ -42,7 +42,6 @@ class DependentFilteredEntityType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-
         $entities = $this->container->getParameter('shtumi.dependent_filtered_entities');
         $options['class'] = $entities[$options['entity_alias']]['class'];
         $options['property'] = $entities[$options['entity_alias']]['property'];
@@ -60,7 +59,6 @@ class DependentFilteredEntityType extends AbstractType
         $builder->setAttribute("empty_value", $options['empty_value']);
 
         $builder->setAttribute("excluded_entity_id", $options['excluded_entity_id']);
-
     }
 
     public function buildView(FormView $view, FormInterface $form, array $options)

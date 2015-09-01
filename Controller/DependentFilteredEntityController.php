@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class DependentFilteredEntityController extends Controller
 {
+    const DQL_PARAMETER_PREFIX = 'param_';
 
     public function getOptionsAction()
     {
@@ -36,13 +37,24 @@ class DependentFilteredEntityController extends Controller
         }
 
         $qb = $this->getDoctrine()
-                ->getRepository($entity_inf['class'])
-                ->createQueryBuilder('e')
-                ->where('e.' . $entity_inf['parent_property'] . ' = :parent_id')
-                ->andWhere('e.id != :excluded_entity_id')
-                ->orderBy('e.' . $entity_inf['order_property'], $entity_inf['order_direction'])
-                ->setParameter('parent_id', $parent_id)
-                ->setParameter('excluded_entity_id', $excludedEntityId);
+            ->getRepository($entity_inf['class'])
+            ->createQueryBuilder('e')
+            ->where('e.' . $entity_inf['parent_property'] . ' = :parent_id')
+            ->andWhere('e.id != :excluded_entity_id');
+
+
+        //add the filters to a query
+        foreach ($entity_inf['child_entity_filters'] as $key => $filter) {
+            $parameterName = DependentFilteredEntityController::DQL_PARAMETER_PREFIX . $filter['property'] . $key;
+
+            $qb
+                ->andWhere('e.' . $filter['property'] . ' ' . $filter['sign'] . ' :' . $parameterName)
+                ->setParameter($parameterName, $filter['value']);
+        }
+
+       $qb->orderBy('e.' . $entity_inf['order_property'], $entity_inf['order_direction'])
+            ->setParameter('parent_id', $parent_id)
+            ->setParameter('excluded_entity_id', $excludedEntityId);
 
 
         if (null !== $entity_inf['callback']) {
