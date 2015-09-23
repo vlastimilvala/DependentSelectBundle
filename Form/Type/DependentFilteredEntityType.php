@@ -25,8 +25,9 @@ class DependentFilteredEntityType extends AbstractType
             'empty_value'       => '',
             'entity_alias'      => null,
             'parent_field'      => null,
+            'fallback_parent_field'   => null,
             'compound'          => false,
-            'excluded_entity_id'   => null
+            'excluded_entity_id'   => null,
         ));
     }
 
@@ -54,6 +55,7 @@ class DependentFilteredEntityType extends AbstractType
         ), true);
 
         $builder->setAttribute("parent_field", $options['parent_field']);
+        $builder->setAttribute("fallback_parent_field", $options['fallback_parent_field']);
         $builder->setAttribute("entity_alias", $options['entity_alias']);
         $builder->setAttribute("no_result_msg", $options['no_result_msg']);
         $builder->setAttribute("empty_value", $options['empty_value']);
@@ -64,6 +66,7 @@ class DependentFilteredEntityType extends AbstractType
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
         $view->vars['parent_field'] = $form->getConfig()->getAttribute('parent_field');
+        $view->vars['fallback_parent_field'] = $form->getConfig()->getAttribute('fallback_parent_field');
         $view->vars['entity_alias'] = $form->getConfig()->getAttribute('entity_alias');
         $view->vars['no_result_msg'] = $form->getConfig()->getAttribute('no_result_msg');
         $view->vars['empty_value'] = $form->getConfig()->getAttribute('empty_value');

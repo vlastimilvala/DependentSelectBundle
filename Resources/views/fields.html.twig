@@ -111,6 +111,9 @@
                     type: "POST",
                     data: {
                         parent_id: jQuery(this).val(),
+                        {% if fallback_parent_field is not null %}
+                        fallback_parent_id: jQuery("#{{ form.parent.offsetGet( fallback_parent_field ).vars.id }}").val(),
+                        {% endif %}
                         entity_alias: "{{ entity_alias }}",
                         empty_value: "{{ empty_value }}",
                         excluded_entity_id: "{{ excluded_entity_id }}"

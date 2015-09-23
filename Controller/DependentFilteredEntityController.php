@@ -2,6 +2,7 @@
 
 namespace Shtumi\UsefulBundle\Controller;
 
+use Doctrine\ORM\QueryBuilder;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
@@ -16,13 +17,13 @@ class DependentFilteredEntityController extends Controller
 
     public function getOptionsAction()
     {
-
         $em = $this->get('doctrine')->getManager();
         $request = $this->getRequest();
         $translator = $this->get('translator');
 
         $entity_alias = $request->get('entity_alias');
         $parent_id    = $request->get('parent_id');
+        $fallbackParentId = $request->get('fallback_parent_id');
         $empty_value  = $request->get('empty_value');
 
         $excludedEntityId = $request->get('excluded_entity_id');
@@ -30,16 +31,33 @@ class DependentFilteredEntityController extends Controller
         $entities = $this->get('service_container')->getParameter('shtumi.dependent_filtered_entities');
         $entity_inf = $entities[$entity_alias];
 
+        //set the fallback
+        if ($entity_inf['fallback_alias'] !== null && !empty($fallbackParentId) && empty($parent_id)) {
+            $parent_id = $fallbackParentId;
+            $entity_inf = $entities[$entity_inf['fallback_alias']];
+        }
+
         if ($entity_inf['role'] !== 'IS_AUTHENTICATED_ANONYMOUSLY'){
             if (false === $this->get('security.context')->isGranted( $entity_inf['role'] )) {
                 throw new AccessDeniedException();
             }
         }
 
+        /** @var QueryBuilder $qb */
         $qb = $this->getDoctrine()
             ->getRepository($entity_inf['class'])
-            ->createQueryBuilder('e')
-            ->where('e.' . $entity_inf['parent_property'] . ' = :parent_id')
+            ->createQueryBuilder('e');
+
+        if($entity_inf['grandparent_property']) {
+            $qb
+                ->leftJoin("e." . $entity_inf['parent_property'], "parent")
+                ->where("parent." . $entity_inf['grandparent_property'] . ' = :parent_id');
+        } else {
+            $qb
+                ->where('e.' . $entity_inf['parent_property'] . ' = :parent_id');
+        }
+
+        $qb
             ->andWhere('e.id != :excluded_entity_id');
 
 
