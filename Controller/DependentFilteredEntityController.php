@@ -27,6 +27,7 @@ class DependentFilteredEntityController extends Controller
         $empty_value  = $request->get('empty_value');
 
         $excludedEntityId = $request->get('excluded_entity_id');
+        $isTranslationDomainEnabled = $request->get('choice_translation_domain');
 
         $entities = $this->get('service_container')->getParameter('shtumi.dependent_filtered_entities');
         $entity_inf = $entities[$entity_alias];
@@ -82,6 +83,7 @@ class DependentFilteredEntityController extends Controller
                 throw new \InvalidArgumentException(sprintf('Callback function "%s" in Repository "%s" does not exist.', $entity_inf['callback'], get_class($repository)));
             }
 
+            //dql callback starts here
             $repository->$entity_inf['callback']($qb);
         }
 
@@ -102,6 +104,11 @@ class DependentFilteredEntityController extends Controller
             if ($entity_inf['property'])
                 $res = $result->$getter();
             else $res = (string)$result;
+
+            //check if translation is enabled
+            if ($isTranslationDomainEnabled) {
+                $res = $translator->trans((string)$res);
+            }
 
             $html = $html . sprintf("<option value=\"%d\">%s</option>",$result->getId(), $res);
         }

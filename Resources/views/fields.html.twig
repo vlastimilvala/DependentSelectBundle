@@ -116,7 +116,8 @@
                         {% endif %}
                         entity_alias: "{{ entity_alias }}",
                         empty_value: "{{ empty_value }}",
-                        excluded_entity_id: "{{ excluded_entity_id }}"
+                        excluded_entity_id: "{{ excluded_entity_id }}",
+                        choice_translation_domain: "{{ choice_translation_domain }}"
                     },
                     url:"{{ path('shtumi_dependent_filtered_entity') }}",
                     success: function(msg){
