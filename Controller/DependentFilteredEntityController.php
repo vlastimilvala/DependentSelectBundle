@@ -28,6 +28,7 @@ class DependentFilteredEntityController extends Controller
 
         $excludedEntityId = $request->get('excluded_entity_id');
         $isTranslationDomainEnabled = $request->get('choice_translation_domain');
+        $choiceTitleTranslationPart = $request->get('choice_title_translation_part');
 
         $entities = $this->get('service_container')->getParameter('shtumi.dependent_filtered_entities');
         $entity_inf = $entities[$entity_alias];
@@ -107,7 +108,11 @@ class DependentFilteredEntityController extends Controller
 
             //check if translation is enabled
             if ($isTranslationDomainEnabled) {
-                $res = $translator->trans((string)$res);
+                if ($choiceTitleTranslationPart) {
+                    $res = $translator->trans((string)$choiceTitleTranslationPart) . str_replace($choiceTitleTranslationPart, '', $res);
+                } else {
+                    $res = $translator->trans((string)$res);
+                }
             }
 
             $html = $html . sprintf("<option value=\"%d\">%s</option>",$result->getId(), $res);

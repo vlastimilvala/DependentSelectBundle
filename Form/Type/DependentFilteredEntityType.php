@@ -29,6 +29,7 @@ class DependentFilteredEntityType extends AbstractType
             'compound'          => false,
             'excluded_entity_id'   => null,
             'choice_translation_domain' => false,
+            'choice_title_translation_part' => null
         ));
     }
 
@@ -61,6 +62,7 @@ class DependentFilteredEntityType extends AbstractType
         $builder->setAttribute("no_result_msg", $options['no_result_msg']);
         $builder->setAttribute("empty_value", $options['empty_value']);
         $builder->setAttribute("choice_translation_domain", $options['choice_translation_domain']);
+        $builder->setAttribute("choice_title_translation_part", $options['choice_title_translation_part']);
 
         $builder->setAttribute("excluded_entity_id", $options['excluded_entity_id']);
     }
@@ -73,6 +75,7 @@ class DependentFilteredEntityType extends AbstractType
         $view->vars['no_result_msg'] = $form->getConfig()->getAttribute('no_result_msg');
         $view->vars['empty_value'] = $form->getConfig()->getAttribute('empty_value');
         $view->vars['choice_translation_domain'] = $form->getConfig()->getAttribute('choice_translation_domain');
+        $view->vars['choice_title_translation_part'] = $form->getConfig()->getAttribute('choice_title_translation_part');
 
         $view->vars['excluded_entity_id'] = $form->getConfig()->getAttribute('excluded_entity_id');
     }
