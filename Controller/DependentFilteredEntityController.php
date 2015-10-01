@@ -100,7 +100,7 @@ class DependentFilteredEntityController extends Controller
 
         $getter =  $this->getGetterName($entity_inf['property']);
 
-        foreach($results as $result)
+        foreach($results as $key => $result)
         {
             if ($entity_inf['property'])
                 $res = $result->$getter();
@@ -115,7 +115,14 @@ class DependentFilteredEntityController extends Controller
                 }
             }
 
-            $html = $html . sprintf("<option value=\"%d\">%s</option>",$result->getId(), $res);
+            $optionString = "<option value=\"%d\">%s</option>";
+
+            //auto select first result (if it's enabled in the config.yml)
+            if ($entity_inf['auto_select_first_result'] && $key === 0) {
+                $optionString = "<option value=\"%d\" selected>%s</option>";
+            }
+
+            $html = $html . sprintf($optionString,$result->getId(), $res);
         }
 
         return new Response($html);

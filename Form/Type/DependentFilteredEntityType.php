@@ -11,7 +11,6 @@ use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 
 class DependentFilteredEntityType extends AbstractType
 {
-
     private $container;
 
     public function __construct($container)
