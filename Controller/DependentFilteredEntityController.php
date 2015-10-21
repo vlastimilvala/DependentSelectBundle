@@ -33,6 +33,8 @@ class DependentFilteredEntityController extends Controller
         $entities = $this->get('service_container')->getParameter('shtumi.dependent_filtered_entities');
         $entity_inf = $entities[$entity_alias];
 
+        $selectedResultService = $entity_inf['selected_result_service'];
+
         //set the fallback
         if ($entity_inf['fallback_alias'] !== null && !empty($fallbackParentId) && empty($parent_id)) {
             $parent_id = $fallbackParentId;
@@ -89,6 +91,7 @@ class DependentFilteredEntityController extends Controller
         }
 
         $results = $qb->getQuery()->getResult();
+        $selectedResultId = $this->get($selectedResultService)->findOptionIdToSelect($results);
 
         if (empty($results)) {
             return new Response('<option value="">' . $translator->trans($entity_inf['no_result_msg']) . '</option>');
@@ -118,11 +121,11 @@ class DependentFilteredEntityController extends Controller
             $optionString = "<option value=\"%d\">%s</option>";
 
             //auto select first result (if it's enabled in the config.yml)
-            if ($entity_inf['auto_select_first_result'] && $key === 0) {
+            if (($entity_inf['auto_select_first_result'] && $key === 0) || $result->getId() === $selectedResultId) {
                 $optionString = "<option value=\"%d\" selected>%s</option>";
             }
 
-            $html = $html . sprintf($optionString,$result->getId(), $res);
+            $html = $html . sprintf($optionString, $result->getId(), $res);
         }
 
         return new Response($html);

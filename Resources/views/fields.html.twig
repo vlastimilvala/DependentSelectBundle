@@ -129,6 +129,7 @@
                                     jQuery(option).prop('selected', true);
                             })
                             jQuery("select#{{ form.vars.id }}").trigger('change');
+
                             jQuery("#loader").hide();
                         } else {
                             jQuery("select#{{ form.vars.id }}").html('<em>{{ no_result_msg|trans() }}</em>');
@@ -140,7 +141,7 @@
                     }
                 });
             });
-            
+
             jQuery("select#{{ form.parent.offsetGet( parent_field ).vars.id }}").trigger('change');
         });
     </script>
