@@ -91,7 +91,12 @@ class DependentFilteredEntityController extends Controller
         }
 
         $results = $qb->getQuery()->getResult();
-        $selectedResultId = $this->get($selectedResultService)->findOptionIdToSelect($results);
+
+        $selectedResultId = null;
+
+        if ($selectedResultService) {
+            $selectedResultId = $this->get($selectedResultService)->findOptionIdToSelect($results);
+        }
 
         if (empty($results)) {
             return new Response('<option value="">' . $translator->trans($entity_inf['no_result_msg']) . '</option>');
