@@ -64,7 +64,6 @@ class DependentFilteredEntityController extends Controller
         $qb
             ->andWhere('e.id != :excluded_entity_id');
 
-
         //add the filters to a query
         foreach ($entity_inf['child_entity_filters'] as $key => $filter) {
             $parameterName = DependentFilteredEntityController::DQL_PARAMETER_PREFIX . $filter['property'] . $key;
@@ -130,13 +129,19 @@ class DependentFilteredEntityController extends Controller
                 $optionString = "<option value=\"%d\" selected>%s</option>";
             }
 
-            $html = $html . sprintf($optionString, $result->getId(), $res);
+            //property to return
+            if ($entity_inf['return_property'] !==null) {
+                $getter =  $this->getGetterName($entity_inf['return_property']);
+                $resultProperty = $result->$getter()->getId();
+            } else {
+                $resultProperty = $result->getId();
+            }
+
+            $html = $html . sprintf($optionString, $resultProperty, $res);
         }
 
         return new Response($html);
-
     }
-
 
     public function getJSONAction()
     {
@@ -204,6 +209,5 @@ class DependentFilteredEntityController extends Controller
         }
 
         return $name;
-
     }
 }
