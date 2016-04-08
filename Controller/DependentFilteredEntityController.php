@@ -52,17 +52,56 @@ class DependentFilteredEntityController extends Controller
             ->getRepository($entity_inf['class'])
             ->createQueryBuilder('e');
 
-        if($entity_inf['grandparent_property']) {
+        //if many to many
+        if($entity_inf['many_to_many']['active'] == true) {
+            $mtmEntity = $entity_inf['many_to_many']['entity'];
+            $mtmProperty = $entity_inf['many_to_many']['property'];
+
+            //make (array)$joinTableResults from mtmEntity to use it into IN (:results) of entity's $qb
+            $qbjt = $this->getDoctrine()
+            ->getRepository($mtmEntity)
+            ->createQueryBuilder('jt');
+
+            $qbjt
+                ->where('jt.' . $entity_inf['parent_property'] . ' = :parent_id');
+
+            $qbjt
+                ->setParameter('parent_id', $parent_id);
+
+            $results = $qbjt->getQuery()->getResult();
+
+            $joinTableResults = [];
+            foreach($results as $result) {
+                $getter = $this->getGetterName($mtmProperty);
+                $joinTableResults[] = $result->$getter()->getId(); //здесь ПОПРАВИТЬ
+            }
+
             $qb
-                ->leftJoin("e." . $entity_inf['parent_property'], "parent")
-                ->where("parent." . $entity_inf['grandparent_property'] . ' = :parent_id');
+                ->andWhere('e.id IN (:results)');
+            $qb
+                ->setParameter('results', $joinTableResults);
         } else {
+            if($entity_inf['grandparent_property']) {
+                $qb
+                    ->leftJoin("e." . $entity_inf['parent_property'], "parent")
+                    ->where("parent." . $entity_inf['grandparent_property'] . ' = :parent_id');
+            } else {
+                $qb
+                    ->where('e.' . $entity_inf['parent_property'] . ' = :parent_id');
+            }
+
             $qb
-                ->where('e.' . $entity_inf['parent_property'] . ' = :parent_id');
+                ->setParameter('parent_id', $parent_id);
         }
 
         $qb
             ->andWhere('e.id != :excluded_entity_id');
+
+        $qb
+            ->setParameter('excluded_entity_id', $excludedEntityId);
+
+        $qb
+            ->orderBy('e.' . $entity_inf['order_property'], $entity_inf['order_direction']);
 
         //add the filters to a query
         foreach ($entity_inf['child_entity_filters'] as $key => $filter) {
@@ -72,11 +111,6 @@ class DependentFilteredEntityController extends Controller
                 ->andWhere('e.' . $filter['property'] . ' ' . $filter['sign'] . ' :' . $parameterName)
                 ->setParameter($parameterName, $filter['value']);
         }
-
-       $qb->orderBy('e.' . $entity_inf['order_property'], $entity_inf['order_direction'])
-            ->setParameter('parent_id', $parent_id)
-            ->setParameter('excluded_entity_id', $excludedEntityId);
-
 
         if (null !== $entity_inf['callback']) {
             $repository = $qb->getEntityManager()->getRepository($entity_inf['class']);
@@ -129,15 +163,7 @@ class DependentFilteredEntityController extends Controller
                 $optionString = "<option value=\"%d\" selected>%s</option>";
             }
 
-            //property to return
-            if ($entity_inf['return_property'] !==null) {
-                $getter =  $this->getGetterName($entity_inf['return_property']);
-                $resultProperty = $result->$getter()->getId();
-            } else {
-                $resultProperty = $result->getId();
-            }
-
-            $html = $html . sprintf($optionString, $resultProperty, $res);
+            $html = $html . sprintf($optionString, $result->getId(), $res);
         }
 
         return new Response($html);
@@ -201,12 +227,15 @@ class DependentFilteredEntityController extends Controller
 
     private function getGetterName($property)
     {
-        $name = "get";
-        $name .= mb_strtoupper($property[0]) . substr($property, 1);
-
-        while (($pos = strpos($name, '_')) !== false){
-            $name = substr($name, 0, $pos) . mb_strtoupper(substr($name, $pos+1, 1)) . substr($name, $pos+2);
-        }
+        $parts = explode('_', $property);
+        $parts = array_map(
+            function($part) {
+                return ucfirst($part);
+            },
+            $parts
+        );
+        $parts = implode($parts);
+        $name = 'get'.$parts;
 
         return $name;
     }
