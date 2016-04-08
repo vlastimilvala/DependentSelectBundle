@@ -53,35 +53,31 @@ class DependentFilteredEntityController extends Controller
             ->createQueryBuilder('e');
 
         //if many to many
-        if($entity_inf['many_to_many']['active'] == true) {
-            $mtmEntity = $entity_inf['many_to_many']['entity'];
-            $mtmProperty = $entity_inf['many_to_many']['property'];
-
-            //make (array)$joinTableResults from mtmEntity to use it into IN (:results) of entity's $qb
+        if ($entity_inf['many_to_many']['active']) {
+            //make (array)$joinTableResults from many_to_many entity to use it into IN (:results) of entity's $qb
             $qbjt = $this->getDoctrine()
-            ->getRepository($mtmEntity)
+            ->getRepository($entity_inf['many_to_many']['entity'])
             ->createQueryBuilder('jt');
 
-            $qbjt
-                ->where('jt.' . $entity_inf['parent_property'] . ' = :parent_id');
-
-            $qbjt
-                ->setParameter('parent_id', $parent_id);
+            if ($parent_id) {
+                $qbjt
+                    ->where('jt.' . $entity_inf['parent_property'] . ' = :parent_id')
+                    ->setParameter('parent_id', $parent_id);
+            }
 
             $results = $qbjt->getQuery()->getResult();
 
             $joinTableResults = [];
             foreach($results as $result) {
-                $getter = $this->getGetterName($mtmProperty);
+                $getter = $this->getGetterName($entity_inf['many_to_many']['property']);
                 $joinTableResults[] = $result->$getter()->getId(); //здесь ПОПРАВИТЬ
             }
 
             $qb
-                ->andWhere('e.id IN (:results)');
-            $qb
+                ->andWhere('e.id IN (:results)')
                 ->setParameter('results', $joinTableResults);
         } else {
-            if($entity_inf['grandparent_property']) {
+            if ($entity_inf['grandparent_property']) {
                 $qb
                     ->leftJoin("e." . $entity_inf['parent_property'], "parent")
                     ->where("parent." . $entity_inf['grandparent_property'] . ' = :parent_id');
@@ -95,14 +91,9 @@ class DependentFilteredEntityController extends Controller
         }
 
         $qb
-            ->andWhere('e.id != :excluded_entity_id');
-
-        $qb
+            ->andWhere('e.id != :excluded_entity_id')
             ->setParameter('excluded_entity_id', $excludedEntityId);
-
-        $qb
-            ->orderBy('e.' . $entity_inf['order_property'], $entity_inf['order_direction']);
-
+        
         //add the filters to a query
         foreach ($entity_inf['child_entity_filters'] as $key => $filter) {
             $parameterName = DependentFilteredEntityController::DQL_PARAMETER_PREFIX . $filter['property'] . $key;
@@ -111,6 +102,9 @@ class DependentFilteredEntityController extends Controller
                 ->andWhere('e.' . $filter['property'] . ' ' . $filter['sign'] . ' :' . $parameterName)
                 ->setParameter($parameterName, $filter['value']);
         }
+
+        $qb
+            ->orderBy('e.' . $entity_inf['order_property'], $entity_inf['order_direction']);
 
         if (null !== $entity_inf['callback']) {
             $repository = $qb->getEntityManager()->getRepository($entity_inf['class']);
@@ -136,6 +130,7 @@ class DependentFilteredEntityController extends Controller
         }
 
         $html = '';
+
         if ($empty_value !== false)
             $html .= '<option value="">' . $translator->trans($empty_value) . '</option>';
 
