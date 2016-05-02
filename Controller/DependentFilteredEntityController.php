@@ -114,7 +114,7 @@ class DependentFilteredEntityController extends Controller
             }
 
             //dql callback starts here
-            $repository->$entity_inf['callback']($qb);
+            call_user_func(array($repository, $entity_inf['callback']), $qb);
         }
 
         $results = $qb->getQuery()->getResult();
