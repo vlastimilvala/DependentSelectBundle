@@ -2,6 +2,7 @@
 
 namespace Shtumi\UsefulBundle\Controller;
 
+use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -22,6 +23,7 @@ class DependentFilteredEntityController extends Controller
         $translator = $this->get('translator');
 
         $entity_alias = $request->get('entity_alias');
+        //parent_id can have multiple identifiers
         $parent_id    = $request->get('parent_id');
         $fallbackParentId = $request->get('fallback_parent_id');
         $empty_value  = $request->get('empty_value');
@@ -47,22 +49,26 @@ class DependentFilteredEntityController extends Controller
             }
         }
 
+        $repository = $this->getDoctrine()->getRepository($entity_inf['class']);
+
         /** @var QueryBuilder $qb */
-        $qb = $this->getDoctrine()
-            ->getRepository($entity_inf['class'])
-            ->createQueryBuilder('e');
+        $qb = $repository->createQueryBuilder('e');
 
         //if many to many
         if ($entity_inf['many_to_many']['active']) {
             //make (array)$joinTableResults from many_to_many entity to use it into IN (:results) of entity's $qb
-            $qbjt = $this->getDoctrine()
-            ->getRepository($entity_inf['many_to_many']['entity'])
-            ->createQueryBuilder('jt');
+            /** @var EntityRepository $manyToManyEntityRepository */
+            $manyToManyEntityRepository = $this->getDoctrine()->getRepository($entity_inf['many_to_many']['entity']);
+
+            $qbjt = $manyToManyEntityRepository->createQueryBuilder('jt');
 
             if ($parent_id) {
                 $qbjt
-                    ->where('jt.' . $entity_inf['parent_property'] . ' = :parent_id')
+                    ->where('jt.' . $entity_inf['parent_property'] . ' IN (:parent_id)')
                     ->setParameter('parent_id', $parent_id);
+            } elseif ($entity_inf['many_to_many']['callback_if_empty_parent']) {
+                //add callback from target entity repository if no arguments given and the callback is specified
+                $manyToManyEntityRepository->{$entity_inf['many_to_many']['callback_if_empty_parent']}($qbjt);
             }
 
             $results = $qbjt->getQuery()->getResult();
@@ -70,7 +76,7 @@ class DependentFilteredEntityController extends Controller
             $joinTableResults = [];
             foreach($results as $result) {
                 $getter = $this->getGetterName($entity_inf['many_to_many']['property']);
-                $joinTableResults[] = $result->$getter()->getId(); //здесь ПОПРАВИТЬ
+                $joinTableResults[] = $result->$getter()->getId(); //TODO: fix it
             }
 
             $qb

@@ -15,4 +15,9 @@ It's not a rare case. So you've decided to use the ShtumiUsefulBundle to create 
             ])
 ```
 NOTE:
-currently it's implemented only for DependentFilteredEntity type.
+it's implemented only for DependentFilteredEntity type.
+
+## Warning
+
+There are lots of new parameters and features (will be documented soon) implemented in DependentFilteredEntity in my version of bundle.
+Other parts of this bundle (DQL, ajax autocomplete, etc.) are not supported and will be removed in the future from here.
