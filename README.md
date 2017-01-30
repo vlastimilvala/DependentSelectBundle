@@ -16,6 +16,9 @@ One of the easiest ways to solve this problem is to send excluded contact id key
             ])
 ```
 NOTE:
-currently it's implemented only for DependentFilteredEntity type.
+it's implemented only for DependentFilteredEntity type.
 
-That's all at the moment.
+## Warning
+
+There are lots of new parameters and features (will be documented soon) implemented in DependentFilteredEntity in my version of bundle.
+Other parts of this bundle (DQL, ajax autocomplete, etc.) are not supported and will be removed in the future from here.
