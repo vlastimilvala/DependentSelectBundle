@@ -1,38 +1,36 @@
 <?php
 
-namespace Shtumi\UsefulBundle\Controller;
+namespace Perkelekurat\DependentSelectBundle\Controller;
 
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
-
 use Symfony\Component\HttpFoundation\Response;
 
 class DependentFilteredEntityController extends Controller
 {
     const DQL_PARAMETER_PREFIX = 'param_';
 
+    /**
+     * @return Response
+     */
     public function getOptionsAction()
     {
-        $em = $this->get('doctrine')->getManager();
         $request = $this->getRequest();
         $translator = $this->get('translator');
 
         $entity_alias = $request->get('entity_alias');
         //parent_id can have multiple identifiers
-        $parent_id    = $request->get('parent_id');
+        $parent_id = $request->get('parent_id');
         $fallbackParentId = $request->get('fallback_parent_id');
-        $empty_value  = $request->get('empty_value');
+        $empty_value = $request->get('empty_value');
 
         $excludedEntityId = $request->get('excluded_entity_id');
         $isTranslationDomainEnabled = $request->get('choice_translation_domain');
         $choiceTitleTranslationPart = $request->get('choice_title_translation_part');
 
-        $entities = $this->get('service_container')->getParameter('shtumi.dependent_filtered_entities');
+        $entities = $this->get('service_container')->getParameter('dependent_select.dependent_filtered_entities');
         $entity_inf = $entities[$entity_alias];
 
         $selectedResultService = $entity_inf['selected_result_service'];
@@ -43,8 +41,8 @@ class DependentFilteredEntityController extends Controller
             $entity_inf = $entities[$entity_inf['fallback_alias']];
         }
 
-        if ($entity_inf['role'] !== 'IS_AUTHENTICATED_ANONYMOUSLY'){
-            if (false === $this->get('security.context')->isGranted( $entity_inf['role'] )) {
+        if ($entity_inf['role'] !== 'IS_AUTHENTICATED_ANONYMOUSLY') {
+            if (false === $this->get('security.context')->isGranted($entity_inf['role'])) {
                 throw new AccessDeniedException();
             }
         }
@@ -64,7 +62,7 @@ class DependentFilteredEntityController extends Controller
 
             if ($parent_id) {
                 $qbjt
-                    ->where('jt.' . $entity_inf['parent_property'] . ' IN (:parent_id)')
+                    ->where('jt.'.$entity_inf['parent_property'].' IN (:parent_id)')
                     ->setParameter('parent_id', $parent_id);
             } elseif ($entity_inf['many_to_many']['callback_if_empty_parent']) {
                 //add callback from target entity repository if no arguments given and the callback is specified
@@ -74,7 +72,7 @@ class DependentFilteredEntityController extends Controller
             $results = $qbjt->getQuery()->getResult();
 
             $joinTableResults = [];
-            foreach($results as $result) {
+            foreach ($results as $result) {
                 $getter = $this->getGetterName($entity_inf['many_to_many']['property']);
                 $joinTableResults[] = $result->$getter()->getId(); //TODO: fix it
             }
@@ -85,11 +83,11 @@ class DependentFilteredEntityController extends Controller
         } else {
             if ($entity_inf['grandparent_property']) {
                 $qb
-                    ->leftJoin("e." . $entity_inf['parent_property'], "parent")
-                    ->where("parent." . $entity_inf['grandparent_property'] . ' = :parent_id');
+                    ->leftJoin('e.'.$entity_inf['parent_property'], 'parent')
+                    ->where('parent.'.$entity_inf['grandparent_property'].' = :parent_id');
             } else {
                 $qb
-                    ->where('e.' . $entity_inf['parent_property'] . ' = :parent_id');
+                    ->where('e.'.$entity_inf['parent_property'].' = :parent_id');
             }
 
             $qb
@@ -99,18 +97,18 @@ class DependentFilteredEntityController extends Controller
         $qb
             ->andWhere('e.id != :excluded_entity_id')
             ->setParameter('excluded_entity_id', $excludedEntityId);
-        
+
         //add the filters to a query
         foreach ($entity_inf['child_entity_filters'] as $key => $filter) {
-            $parameterName = DependentFilteredEntityController::DQL_PARAMETER_PREFIX . $filter['property'] . $key;
+            $parameterName = self::DQL_PARAMETER_PREFIX.$filter['property'].$key;
 
             $qb
-                ->andWhere('e.' . $filter['property'] . ' ' . $filter['sign'] . ' :' . $parameterName)
+                ->andWhere('e.'.$filter['property'].' '.$filter['sign'].' :'.$parameterName)
                 ->setParameter($parameterName, $filter['value']);
         }
 
         $qb
-            ->orderBy('e.' . $entity_inf['order_property'], $entity_inf['order_direction']);
+            ->orderBy('e.'.$entity_inf['order_property'], $entity_inf['order_direction']);
 
         if (null !== $entity_inf['callback']) {
             $repository = $qb->getEntityManager()->getRepository($entity_inf['class']);
@@ -120,7 +118,7 @@ class DependentFilteredEntityController extends Controller
             }
 
             //dql callback starts here
-            call_user_func(array($repository, $entity_inf['callback']), $qb);
+            call_user_func([$repository, $entity_inf['callback']], $qb);
         }
 
         $results = $qb->getQuery()->getResult();
@@ -132,44 +130,49 @@ class DependentFilteredEntityController extends Controller
         }
 
         if (empty($results)) {
-            return new Response('<option value="">' . $translator->trans($entity_inf['no_result_msg']) . '</option>');
+            return new Response('<option value="">'.$translator->trans($entity_inf['no_result_msg']).'</option>');
         }
 
         $html = '';
 
-        if ($empty_value !== false)
-            $html .= '<option value="">' . $translator->trans($empty_value) . '</option>';
+        if ($empty_value !== false) {
+            $html .= '<option value="">'.$translator->trans($empty_value).'</option>';
+        }
 
-        $getter =  $this->getGetterName($entity_inf['property']);
+        $getter = $this->getGetterName($entity_inf['property']);
 
-        foreach($results as $key => $result)
-        {
-            if ($entity_inf['property'])
+        foreach ($results as $key => $result) {
+            if ($entity_inf['property']) {
                 $res = $result->$getter();
-            else $res = (string)$result;
+            } else {
+                $res = (string) $result;
+            }
 
             //check if translation is enabled
             if ($isTranslationDomainEnabled) {
                 if ($choiceTitleTranslationPart) {
-                    $res = $translator->trans((string)$choiceTitleTranslationPart) . str_replace($choiceTitleTranslationPart, '', $res);
+                    $res = $translator->trans((string) $choiceTitleTranslationPart).str_replace($choiceTitleTranslationPart, '', $res);
                 } else {
-                    $res = $translator->trans((string)$res);
+                    $res = $translator->trans((string) $res);
                 }
             }
 
-            $optionString = "<option value=\"%d\">%s</option>";
+            $optionString = '<option value="%d">%s</option>';
 
             //auto select first result (if it's enabled in the config.yml)
             if (($entity_inf['auto_select_first_result'] && $key === 0) || $result->getId() === $selectedResultId) {
-                $optionString = "<option value=\"%d\" selected>%s</option>";
+                $optionString = '<option value="%d" selected>%s</option>';
             }
 
-            $html = $html . sprintf($optionString, $result->getId(), $res);
+            $html = $html.sprintf($optionString, $result->getId(), $res);
         }
 
         return new Response($html);
     }
 
+    /**
+     * @return Response
+     */
     public function getJSONAction()
     {
         /** @var \Doctrine\ORM\EntityManager $em */
@@ -177,13 +180,13 @@ class DependentFilteredEntityController extends Controller
         $request = $this->get('request');
 
         $entity_alias = $request->get('entity_alias');
-        $parent_id    = $request->get('parent_id');
+        $parent_id = $request->get('parent_id');
 
-        $entities = $this->get('service_container')->getParameter('shtumi.dependent_filtered_entities');
+        $entities = $this->get('service_container')->getParameter('dependent_select.dependent_filtered_entities');
         $entity_inf = $entities[$entity_alias];
 
-        if ($entity_inf['role'] !== 'IS_AUTHENTICATED_ANONYMOUSLY'){
-            if (false === $this->get('security.context')->isGranted( $entity_inf['role'] )) {
+        if ($entity_inf['role'] !== 'IS_AUTHENTICATED_ANONYMOUSLY') {
+            if (false === $this->get('security.context')->isGranted($entity_inf['role'])) {
                 throw new AccessDeniedException();
             }
         }
@@ -191,46 +194,51 @@ class DependentFilteredEntityController extends Controller
         $term = $request->get('term');
         $maxRows = $request->get('maxRows', 20);
 
-        $like = '%' . $term . '%';
+        $like = '%'.$term.'%';
 
         $property = $entity_inf['property'];
         if (!$entity_inf['property_complicated']) {
-            $property = 'e.' . $property;
+            $property = 'e.'.$property;
         }
 
         $qb = $em->createQueryBuilder()
             ->select('e')
             ->from($entity_inf['class'], 'e')
-            ->where('e.' . $entity_inf['parent_property'] . ' = :parent_id')
+            ->where('e.'.$entity_inf['parent_property'].' = :parent_id')
             ->setParameter('parent_id', $parent_id)
-            ->orderBy('e.' . $entity_inf['order_property'], $entity_inf['order_direction'])
-            ->setParameter('like', $like )
+            ->orderBy('e.'.$entity_inf['order_property'], $entity_inf['order_direction'])
+            ->setParameter('like', $like)
             ->setMaxResults($maxRows);
 
         if ($entity_inf['case_insensitive']) {
-            $qb->andWhere('LOWER(' . $property . ') LIKE LOWER(:like)');
+            $qb->andWhere('LOWER('.$property.') LIKE LOWER(:like)');
         } else {
-            $qb->andWhere($property . ' LIKE :like');
+            $qb->andWhere($property.' LIKE :like');
         }
 
         $results = $qb->getQuery()->getResult();
 
-        $res = array();
-        foreach ($results AS $r){
-            $res[] = array(
+        $res = [];
+        foreach ($results as $r) {
+            $res[] = [
                 'id' => $r->getId(),
-                'text' => (string)$r
-            );
+                'text' => (string) $r,
+            ];
         }
 
         return new Response(json_encode($res));
     }
 
+    /**
+     * @param string $property
+     *
+     * @return string
+     */
     private function getGetterName($property)
     {
         $parts = explode('_', $property);
         $parts = array_map(
-            function($part) {
+            function ($part) {
                 return ucfirst($part);
             },
             $parts

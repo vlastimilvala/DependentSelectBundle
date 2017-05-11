@@ -1,6 +1,6 @@
 <?php
 
-namespace Shtumi\UsefulBundle\Service;
+namespace Perkelekurat\DependentSelectBundle\Service;
 
 /**
  * Interface DependentFieldSelectedOptionInterface

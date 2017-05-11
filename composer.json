@@ -1,13 +1,24 @@
 {
-    "name": "perkelekurat/shtumi-useful-bundle",
+    "name": "perkelekurat/dependent-select-bundle",
     "type": "symfony-bundle",
-    "description": "Symfony ShtumiUsefulBundle",
-    "keywords": ["Ajax Autocomplete form type", "Dependent filtered form type", "daterange", "shtumi"],
+    "description": "Symfony DependentSelectBundle",
+    "keywords": ["ajax dependent form", "dependent select"],
     "license": "MIT",
     "authors": [
         {
-            "name": "improved by Artemy Pärna",
-            "email": "lagunemine@gmail.com"
+            "name": "Evercode Lab",
+            "homepage": "http://evercodelab.com",
+            "role": "Developer"
+        },
+        {
+            "name": "Artem Antcev (Perkelekurat)",
+            "homepage": "http://github.com/perkelekurat",
+            "role": "Developer"
+        },
+	    {
+            "name": "Shtumi",
+            "homepage": "http://github.com/shtumi",
+            "role": "Developer"
         }
     ],
     "require": {
@@ -18,7 +29,7 @@
         "sonata-project/doctrine-orm-admin-bundle": "master-dev"
     },
     "autoload": {
-        "psr-0": { "Shtumi\\UsefulBundle": "" }
+        "psr-0": { "Perkelekurat\\DependentSelectBundle": "" }
     },
-    "target-dir": "Shtumi/UsefulBundle"
+    "target-dir": "Perkelekurat/DependentSelectBundle"
 }

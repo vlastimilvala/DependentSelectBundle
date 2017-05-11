@@ -1,6 +1,6 @@
 <?php
 
-namespace Shtumi\UsefulBundle\Form\DataTransformer;
+namespace Perkelekurat\DependentSelectBundle\Form\DataTransformer;
 
 use Symfony\Component\Form\DataTransformerInterface;
 use Doctrine\ORM\EntityManager;
@@ -10,11 +10,25 @@ use Symfony\Component\Form\Exception\FormException;
 
 class EntityToIdTransformer implements DataTransformerInterface
 {
-
+    /**
+     * @var EntityManager
+     */
     protected $em;
+
+    /**
+     * @var string
+     */
     protected $class;
+
+    /**
+     * @var \Doctrine\ORM\UnitOfWork
+     */
     protected $unitOfWork;
 
+    /**
+     * @param EntityManager $em
+     * @param $class
+     */
     public function __construct(EntityManager $em, $class)
     {
         $this->em = $em;
@@ -22,9 +36,11 @@ class EntityToIdTransformer implements DataTransformerInterface
         $this->class = $class;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function transform($entity)
     {
-
         if (null === $entity || '' === $entity) {
             return 'null';
         }
@@ -38,6 +54,9 @@ class EntityToIdTransformer implements DataTransformerInterface
         return $entity->getId();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function reverseTransform($id)
     {
         if ('' === $id || null === $id) {
@@ -45,7 +64,7 @@ class EntityToIdTransformer implements DataTransformerInterface
         }
 
         if (!is_numeric($id)) {
-            throw new UnexpectedTypeException($id, 'numeric' . $id);
+            throw new UnexpectedTypeException($id, 'numeric'.$id);
         }
 
         $entity = $this->em->getRepository($this->class)->findOneById($id);
