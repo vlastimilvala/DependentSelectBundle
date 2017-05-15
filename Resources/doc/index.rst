@@ -1,7 +1,7 @@
 DependentSelectBundle
 =====================
 
-.. image:: https://github.com/perkelekurat/DependentSelectBundle/raw/master/Resources/doc/images/dependent_filtered_entity.png
+.. image:: https://github.com/EvercodeLab/DependentSelectBundle/raw/master/Resources/doc/images/dependent_filtered_entity.png
 
 
 Configuration

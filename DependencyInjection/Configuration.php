@@ -1,6 +1,6 @@
 <?php
 
-namespace Perkelekurat\DependentSelectBundle\DependencyInjection;
+namespace Evercode\DependentSelectBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;

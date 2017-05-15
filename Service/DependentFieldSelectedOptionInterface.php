@@ -1,6 +1,6 @@
 <?php
 
-namespace Perkelekurat\DependentSelectBundle\Service;
+namespace Evercode\DependentSelectBundle\Service;
 
 /**
  * Interface DependentFieldSelectedOptionInterface

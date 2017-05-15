@@ -10,7 +10,7 @@
 
     <services>
 
-        <service id="dependent_select.type.dependent_filtered_entity" class="Perkelekurat\DependentSelectBundle\Form\Type\DependentFilteredEntityType">
+        <service id="dependent_select.type.dependent_filtered_entity" class="Evercode\DependentSelectBundle\Form\Type\DependentFilteredEntityType">
             <tag name="form.type" alias="dependent_filtered_entity"/>
             <argument type="service" id="service_container"/>
         </service>

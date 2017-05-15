@@ -1,6 +1,6 @@
 <?php
 
-namespace Perkelekurat\DependentSelectBundle\DependencyInjection;
+namespace Evercode\DependentSelectBundle\DependencyInjection;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;

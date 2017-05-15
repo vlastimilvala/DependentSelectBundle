@@ -1,6 +1,6 @@
 <?php
 
-namespace Perkelekurat\DependentSelectBundle\Controller;
+namespace Evercode\DependentSelectBundle\Controller;
 
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;

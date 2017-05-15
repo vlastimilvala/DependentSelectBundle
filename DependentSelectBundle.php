@@ -1,6 +1,6 @@
 <?php
 
-namespace Perkelekurat\DependentSelectBundle;
+namespace Evercode\DependentSelectBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 

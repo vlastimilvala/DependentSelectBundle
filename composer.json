@@ -1,7 +1,7 @@
 {
-    "name": "perkelekurat/dependent-select-bundle",
+    "name": "evercodelab/dependent-select-bundle",
     "type": "symfony-bundle",
-    "description": "Symfony DependentSelectBundle",
+    "description": "This bundle helps to create dependent AJAX fields for Symfony forms",
     "keywords": ["ajax dependent form", "dependent select"],
     "license": "MIT",
     "authors": [
@@ -11,7 +11,7 @@
             "role": "Developer"
         },
         {
-            "name": "Artem Antcev (Perkelekurat)",
+            "name": "Artemy Antcev",
             "homepage": "http://github.com/perkelekurat",
             "role": "Developer"
         },
@@ -29,7 +29,6 @@
         "sonata-project/doctrine-orm-admin-bundle": "master-dev"
     },
     "autoload": {
-        "psr-0": { "Perkelekurat\\DependentSelectBundle": "" }
-    },
-    "target-dir": "Perkelekurat/DependentSelectBundle"
+        "psr-0": { "Evercode\\DependentSelectBundle": "" }
+    }
 }
