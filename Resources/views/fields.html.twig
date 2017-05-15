@@ -20,14 +20,14 @@
                         choice_translation_domain: "{{ choice_translation_domain }}",
                         choice_title_translation_part: "{{ choice_title_translation_part }}"
                     },
-                    url:"{{ path('shtumi_dependent_filtered_entity') }}",
+                    url:"{{ path('dependent_select') }}",
                     success: function(msg){
                         if (msg != ''){
                             jQuery("select#{{ form.vars.id }}").html(msg).show();
                             jQuery.each(jQuery("select#{{ form.vars.id }} option"), function (index, option){
                                 if (jQuery(option).val() == selected_index)
                                     jQuery(option).prop('selected', true);
-                            })
+                            });
                             jQuery("select#{{ form.vars.id }}").trigger('change');
                         } else {
                             jQuery("select#{{ form.vars.id }}").html('<em>{{ no_result_msg|trans() }}</em>');
