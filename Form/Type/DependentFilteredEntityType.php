@@ -51,14 +51,6 @@ class DependentFilteredEntityType extends AbstractType
     }
 
     /**
-     * @return string
-     */
-    public function getName()
-    {
-        return 'shtumi_dependent_filtered_entity';
-    }
-
-    /**
      * @param FormBuilderInterface $builder
      * @param array $options
      */
