@@ -29,6 +29,7 @@ class DependentFilteredEntityController extends Controller
         $excludedEntityId = $request->get('excluded_entity_id');
         $isTranslationDomainEnabled = $request->get('choice_translation_domain');
         $choiceTitleTranslationPart = $request->get('choice_title_translation_part');
+        $callbackParameters = json_decode($request->get('callback_parameters'), true);
 
         $entities = $this->get('service_container')->getParameter('dependent_select.dependent_filtered_entities');
         $entity_inf = $entities[$entity_alias];
@@ -118,7 +119,11 @@ class DependentFilteredEntityController extends Controller
             }
 
             //dql callback starts here
-            call_user_func([$repository, $entity_inf['callback']], $qb);
+            if (!empty($callbackParameters)) {
+                call_user_func([$repository, $entity_inf['callback']], $qb, $callbackParameters);
+            } else {
+                call_user_func([$repository, $entity_inf['callback']], $qb);
+            }
         }
 
         $results = $qb->getQuery()->getResult();
