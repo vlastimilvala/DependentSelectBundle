@@ -5,6 +5,7 @@ namespace Evercode\DependentSelectBundle\Controller;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -15,9 +16,8 @@ class DependentFilteredEntityController extends Controller
     /**
      * @return Response
      */
-    public function getOptionsAction()
+    public function getOptionsAction(Request $request)
     {
-        $request = $this->getRequest();
         $translator = $this->get('translator');
 
         $entity_alias = $request->get('entity_alias');
@@ -43,7 +43,7 @@ class DependentFilteredEntityController extends Controller
         }
 
         if ($entity_inf['role'] !== 'IS_AUTHENTICATED_ANONYMOUSLY') {
-            if (false === $this->get('security.context')->isGranted($entity_inf['role'])) {
+            if (false === $this->get('security.authorization_checker')->isGranted($entity_inf['role'])) {
                 throw new AccessDeniedException();
             }
         }
@@ -95,9 +95,9 @@ class DependentFilteredEntityController extends Controller
                 ->setParameter('parent_id', $parent_id);
         }
 
-        $qb
-            ->andWhere('e.id != :excluded_entity_id')
-            ->setParameter('excluded_entity_id', $excludedEntityId);
+        // $qb
+            // ->andWhere('e.id != :excluded_entity_id')
+            // ->setParameter('excluded_entity_id', $excludedEntityId);
 
         //add the filters to a query
         foreach ($entity_inf['child_entity_filters'] as $key => $filter) {
@@ -178,11 +178,10 @@ class DependentFilteredEntityController extends Controller
     /**
      * @return Response
      */
-    public function getJSONAction()
+    public function getJSONAction(Request $request)
     {
         /** @var \Doctrine\ORM\EntityManager $em */
         $em = $this->get('doctrine.orm.entity_manager');
-        $request = $this->get('request');
 
         $entity_alias = $request->get('entity_alias');
         $parent_id = $request->get('parent_id');
@@ -191,7 +190,7 @@ class DependentFilteredEntityController extends Controller
         $entity_inf = $entities[$entity_alias];
 
         if ($entity_inf['role'] !== 'IS_AUTHENTICATED_ANONYMOUSLY') {
-            if (false === $this->get('security.context')->isGranted($entity_inf['role'])) {
+            if (false === $this->get('security.authorization_checker')->isGranted($entity_inf['role'])) {
                 throw new AccessDeniedException();
             }
         }

@@ -4,7 +4,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://symfony.com/schema/routing http://symfony.com/schema/routing/routing-1.0.xsd">
 
-    <route id="dependent_select" pattern="/dependent_select">
+    <route id="dependent_select" path="/dependent_select">
         <default key="_controller">%dependent_filtered_entity_controller_route%</default>
     </route>
 
